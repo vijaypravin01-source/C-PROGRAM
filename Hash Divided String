@@ -1,0 +1,27 @@
+#include <string.h>
+#include <stdlib.h>
+
+char* stringHash(char* s, int k) {
+    int len = strlen(s);
+    int result_len = len / k;
+    
+    // Allocate memory for the resulting string + null terminator
+    char* result = (char*)malloc((result_len + 1) * sizeof(char));
+    
+    for (int i = 0; i < result_len; i++) {
+        int charSum = 0;
+        
+        // Sum up alphabetical indices for the current chunk of length k
+        for (int j = 0; j < k; j++) {
+            charSum += s[i * k + j] - 'a';
+        }
+        
+        // Compute character modulo 26 and store it
+        result[i] = 'a' + (charSum % 26);
+    }
+    
+    // Add null terminator to mark the end of the C-string
+    result[result_len] = '\0';
+    
+    return result;
+}
