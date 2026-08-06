@@ -1,0 +1,70 @@
+/**
+ * Definition for singly-linked list.
+ * struct ListNode {
+ *     int val;
+ *     struct ListNode *next;
+ * };
+ */
+
+// Helper function to split the list by 'size' steps and return the next segment's head
+struct ListNode* split(struct ListNode* head, int size) {
+    for (int i = 1; head && i < size; i++) {
+        head = head->next;
+    }
+    if (!head) return NULL;
+    
+    struct ListNode* nextPart = head->next;
+    head->next = NULL; // Disconnect the segment
+    return nextPart;
+}
+
+// Helper function to merge two sorted lists and append them to a tail node
+struct ListNode* merge(struct ListNode* l1, struct ListNode* l2, struct ListNode* tail) {
+    struct ListNode* curr = tail;
+    while (l1 && l2) {
+        if (l1->val < l2->val) {
+            curr->next = l1;
+            l1 = l1->next;
+        } else {
+            curr->next = l2;
+            l2 = l2->next;
+        }
+        curr = curr->next;
+    }
+    curr->next = l1 ? l1 : l2;
+    while (curr->next) {
+        curr = curr->next;
+    }
+    return curr; // Return the new tail of the merged segment
+}
+
+struct ListNode* sortList(struct ListNode* head) {
+    if (!head || !head->next) return head;
+
+    // 1. Count total number of nodes
+    int length = 0;
+    struct ListNode* curr = head;
+    while (curr) {
+        length++;
+        curr = curr->next;
+    }
+
+    struct ListNode dummy;
+    dummy.next = head;
+
+    // 2. Bottom-up merge sub-lists of size 1, 2, 4, 8, ...
+    for (int size = 1; size < length; size *= 2) {
+        struct ListNode* prevTail = &dummy;
+        curr = dummy.next;
+
+        while (curr) {
+            struct ListNode* l1 = curr;
+            struct ListNode* l2 = split(l1, size);
+            curr = split(l2, size); // Next starting sub-list iteration
+
+            prevTail = merge(l1, l2, prevTail);
+        }
+    }
+
+    return dummy.next;
+}
