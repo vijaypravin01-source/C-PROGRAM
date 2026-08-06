@@ -1,0 +1,61 @@
+#include <stdlib.h>
+
+// Helper function to merge two sorted halves
+void merge(int* nums, int left, int mid, int right, int* temp) {
+    int i = left;      // Initial index of first subarray
+    int j = mid + 1;   // Initial index of second subarray
+    int k = left;      // Initial index of merged array
+
+    // Copy data to temp arrays
+    while (i <= mid && j <= right) {
+        if (nums[i] <= nums[j]) {
+            temp[k++] = nums[i++];
+        } else {
+            temp[k++] = nums[j++];
+        }
+    }
+
+    // Copy remaining elements of left subarray if any
+    while (i <= mid) {
+        temp[k++] = nums[i++];
+    }
+
+    // Copy remaining elements of right subarray if any
+    while (j <= right) {
+        temp[k++] = nums[j++];
+    }
+
+    // Copy the merged elements back into the original array
+    for (i = left; i <= right; i++) {
+        nums[i] = temp[i];
+    }
+}
+
+// Recursive function to divide and sort the array
+void mergeSort(int* nums, int left, int right, int* temp) {
+    if (left < right) {
+        int mid = left + (right - left) / 2;
+
+        // Sort first and second halves
+        mergeSort(nums, left, mid, temp);
+        mergeSort(nums, mid + 1, right, temp);
+
+        // Merge the sorted halves
+        merge(nums, left, mid, right, temp);
+    }
+}
+
+int* sortArray(int* nums, int numsSize, int* returnSize) {
+    *returnSize = numsSize;
+    
+    // Allocate temporary array for merging to optimize space reuse
+    int* temp = (int*)malloc(numsSize * sizeof(int));
+    
+    // Run the merge sort algorithm
+    mergeSort(nums, 0, numsSize - 1, temp);
+    
+    // Free the temporary workspace memory
+    free(temp);
+    
+    return nums;
+}
