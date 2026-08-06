@@ -1,0 +1,45 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+
+/**
+ * Return an array of arrays of size *returnSize.
+ * The sizes of the arrays are returned as *returnColumnSizes array.
+ * Note: Both returned array and *columnSizes array must be malloced, assume caller calls free().
+ */
+int** subsets(int* nums, int numsSize, int* returnSize, int** returnColumnSizes) {
+    // 1. Calculate total number of subsets (2^n)
+    int totalSubsets = 1 << numsSize; 
+    *returnSize = totalSubsets;
+
+    // 2. Allocate memory for the main return array and column sizes array
+    int** result = (int**)malloc(totalSubsets * sizeof(int*));
+    *returnColumnSizes = (int*)malloc(totalSubsets * sizeof(int));
+
+    // 3. Use Bit Manipulation to generate subsets
+    for (int i = 0; i < totalSubsets; i++) {
+        // Count how many elements will be in this specific subset
+        int subsetSize = 0;
+        for (int j = 0; j < numsSize; j++) {
+            if ((i & (1 << j)) != 0) {
+                subsetSize++;
+            }
+        }
+
+        // Store the size of the current subset
+        (*returnColumnSizes)[i] = subsetSize;
+
+        // Allocate memory for the current subset array
+        result[i] = (int*)malloc(subsetSize * sizeof(int));
+
+        // Fill the current subset array with matching elements
+        int index = 0;
+        for (int j = 0; j < numsSize; j++) {
+            if ((i & (1 << j)) != 0) {
+                result[i][index++] = nums[j];
+            }
+        }
+    }
+
+    return result;
+}
