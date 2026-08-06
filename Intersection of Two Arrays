@@ -1,0 +1,35 @@
+#include <stdlib.h>
+#include <string.h>
+
+/**
+ * Note: The returned array must be malloced, assume caller calls free().
+ */
+int* intersection(int* nums1, int nums1Size, int* nums2, int nums2Size, int* returnSize) {
+    // Lookup tables for presence tracking (0 to 1000)
+    int hash1[1001] = {0};
+    int hash2[1001] = {0};
+    
+    // Mark elements present in the first array
+    for (int i = 0; i < nums1Size; i++) {
+        hash1[nums1[i]] = 1;
+    }
+    
+    // Determine the maximum potential size of the intersection array
+    int max_possible_size = (nums1Size < nums2Size) ? nums1Size : nums2Size;
+    int* result = (int*)malloc(max_possible_size * sizeof(int));
+    
+    int count = 0;
+    // Find matching unique elements in the second array
+    for (int i = 0; i < nums2Size; i++) {
+        int current_val = nums2[i];
+        // If it exists in nums1 and hasn't been added to results yet
+        if (hash1[current_val] == 1 && hash2[current_val] == 0) {
+            result[count++] = current_val;
+            hash2[current_val] = 1; // Mark as added to avoid duplicates
+        }
+    }
+    
+    // Set the output size parameter for the caller
+    *returnSize = count;
+    return result;
+}
