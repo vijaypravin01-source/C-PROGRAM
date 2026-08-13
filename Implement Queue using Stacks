@@ -1,0 +1,92 @@
+#include <stdbool.h>
+#include <stdlib.h>
+
+#define MAX_SIZE 105
+
+// Custom lightweight stack structure
+typedef struct {
+    int data[MAX_SIZE];
+    int top;
+} Stack;
+
+// Clean wrapper structure representing our custom Queue
+typedef struct {
+    Stack s1; // For incoming pushes
+    Stack s2; // For outgoing pops/peeks
+    int frontVal;
+} MyQueue;
+
+// Helper function to initialize an individual stack
+void initStack(Stack* s) {
+    s->top = -1;
+}
+
+// Helper to push to our custom stack
+void stackPush(Stack* s, int x) {
+    s->data[++(s->top)] = x;
+}
+
+// Helper to pop from our custom stack
+int stackPop(Stack* s) {
+    return s->data[(s->top)--];
+}
+
+// Helper to peek the top of our custom stack
+int stackTop(Stack* s) {
+    return s->data[s->top];
+}
+
+// Helper to check if our custom stack is empty
+bool stackIsEmpty(Stack* s) {
+    return s->top == -1;
+}
+
+// --- LeetCode Interface Functions ---
+
+MyQueue* myQueueCreate() {
+    MyQueue* obj = (MyQueue*)malloc(sizeof(MyQueue));
+    initStack(&(obj->s1));
+    initStack(&(obj->s2));
+    obj->frontVal = 0;
+    return obj;
+}
+
+// Push element x to the back of queue.
+// Time Complexity: O(1)
+void myQueuePush(MyQueue* obj, int x) {
+    if (stackIsEmpty(&(obj->s1))) {
+        obj->frontVal = x; // Update the tracking index if s1 was empty
+    }
+    stackPush(&(obj->s1), x);
+}
+
+// Removes the element from in front of queue and returns it.
+// Time Complexity: Amortized O(1)
+int myQueuePop(MyQueue* obj) {
+    // If s2 is empty, flush all elements from s1 into s2 to invert the order
+    if (stackIsEmpty(&(obj->s2))) {
+        while (!stackIsEmpty(&(obj->s1))) {
+            stackPush(&(obj->s2), stackPop(&(obj->s1)));
+        }
+    }
+    return stackPop(&(obj->s2));
+}
+
+// Get the front element.
+// Time Complexity: O(1)
+int myQueuePeek(MyQueue* obj) {
+    if (!stackIsEmpty(&(obj->s2))) {
+        return stackTop(&(obj->s2));
+    }
+    return obj->frontVal;
+}
+
+// Returns whether the queue is empty.
+// Time Complexity: O(1)
+bool myQueueEmpty(MyQueue* obj) {
+    return stackIsEmpty(&(obj->s1)) && stackIsEmpty(&(obj->s2));
+}
+
+void myQueueFree(MyQueue* obj) {
+    free(obj);
+}
