@@ -1,0 +1,77 @@
+#include <stdio.h>
+#include <stdlib.h>
+typedef struct {
+    int x;
+    int y;
+} Point;
+int comparePoints(const void* a, const void* b) {
+    Point* p1 = (Point*)a;
+    Point* p2 = (Point*)b;
+    if (p1->x != p2->x) {
+        return (p1->x < p2->x) ? -1 : 1;
+    }
+    if (p1->y != p2->y) {
+        return (p1->y > p2->y) ? -1 : 1;
+    }
+    return 0;
+}
+int lowerBound(int* lis, int size, int target) {
+    int low = 0, high = size;
+    while (low < high) {
+        int mid = low + (high - low) / 2;
+        if (lis[mid] >= target) {
+            high = mid;
+        } else {
+            low = mid + 1;
+        }
+    }
+    return low;
+}
+int getLisLen(Point* points, int size) {
+    if (size == 0) return 0;
+    qsort(points, size, sizeof(Point), comparePoints);
+    int* lis = (int*)malloc(size * sizeof(int));
+    int lisSize = 0;
+    for (int i = 0; i < size; i++) {
+        int y = points[i].y;
+        int idx = lowerBound(lis, lisSize, y);
+        
+        if (idx == lisSize) {
+            lis[lisSize++] = y;
+        } else {
+            lis[idx] = y;
+        }
+    }
+    free(lis);
+    return lisSize;
+}
+
+int maxPathLength(int** coordinates, int coordinatesSize, int* coordinatesColSize, int k) {
+    int kx = coordinates[k][0];
+    int ky = coordinates[k][1];
+    Point* left_points = (Point*)malloc(coordinatesSize * sizeof(Point));
+    Point* right_points = (Point*)malloc(coordinatesSize * sizeof(Point));
+    
+    int leftSize = 0;
+    int rightSize = 0;
+    for (int i = 0; i < coordinatesSize; i++) {
+        int x = coordinates[i][0];
+        int y = coordinates[i][1];
+        
+        if (x < kx && y < ky) {
+            left_points[leftSize].x = x;
+            left_points[leftSize].y = y;
+            leftSize++;
+        } else if (x > kx && y > ky) {
+            right_points[rightSize].x = x;
+            right_points[rightSize].y = y;
+            rightSize++;
+        }
+    }
+    int leftLis = getLisLen(left_points, leftSize);
+    int rightLis = getLisLen(right_points, rightSize);
+    free(left_points);
+    free(right_points);
+
+    return leftLis + 1 + rightLis;
+}
