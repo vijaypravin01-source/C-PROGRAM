@@ -1,0 +1,94 @@
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     struct TreeNode *left;
+ *     struct TreeNode *right;
+ * };
+ */
+
+// Helper function to perform a left rotation around a parent node
+void rotateLeft(struct TreeNode* grandParent, struct TreeNode* parent, struct TreeNode* child) {
+    if (grandParent != NULL) {
+        grandParent->right = child;
+    }
+    parent->right = child->left;
+    child->left = parent;
+}
+
+// Helper function to perform a right rotation around a parent node
+void rotateRight(struct TreeNode* grandParent, struct TreeNode* parent, struct TreeNode* child) {
+    if (grandParent != NULL) {
+        grandParent->right = child;
+    }
+    parent->left = child->right;
+    child->right = parent;
+}
+
+// Phase 1: Flatten the BST into a right-skewed "vine"
+int treeToVine(struct TreeNode* grandParent) {
+    int count = 0;
+    struct TreeNode* parent = grandParent->right;
+    
+    while (parent != NULL) {
+        if (parent->left != NULL) {
+            struct TreeNode* child = parent->left;
+            rotateRight(grandParent, parent, child);
+            parent = child; // Keep processing the new parent at this position
+        } else {
+            count++;
+            grandParent = parent;
+            parent = parent->right;
+        }
+    }
+    return count;
+}
+
+// Phase 2: Perform left rotations to compress the vine into a balanced tree
+void compress(struct TreeNode* grandParent, int m) {
+    struct TreeNode* parent = grandParent->right;
+    for (int i = 0; i < m; i++) {
+        struct TreeNode* child = parent->right;
+        rotateLeft(grandParent, parent, child);
+        grandParent = child;
+        parent = grandParent->right;
+    }
+}
+
+// Utility function to calculate the highest power of 2 less than or equal to n + 1
+int greatestPowerOf2LessThan(int n) {
+    int x = 1;
+    while (x <= n) {
+        x <<= 1;
+    }
+    return x >> 1;
+}
+
+// Main function to balance the BST
+struct TreeNode* balanceBST(struct TreeNode* root) {
+    if (root == NULL) return NULL;
+
+    // Create a temporary dummy node acting as a super-root to simplify rotations
+    struct TreeNode dummy;
+    dummy.val = 0;
+    dummy.left = NULL;
+    dummy.right = root;
+
+    // Step 1: Flatten the tree into a single vine and count total nodes
+    int n = treeToVine(&dummy);
+
+    // Step 2: Calculate leaves in the bottom-most level of a perfectly balanced tree
+    int m = n + 1 - greatestPowerOf2LessThan(n + 1);
+
+    // Compress the excess leaf nodes first
+    compress(&dummy, m);
+
+    // Continually compress the remaining internal nodes by dividing count by 2
+    n = n - m;
+    while (n > 1) {
+        n /= 2;
+        compress(&dummy, n);
+    }
+
+    return dummy.right;
+}
