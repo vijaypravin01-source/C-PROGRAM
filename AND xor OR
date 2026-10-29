@@ -1,0 +1,50 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+// Macros for optimization
+#define MAX(a, b) ((a) > (b) ? (a) : (b))
+
+int main() {
+    // Optimize standard C I/O performance
+    int n;
+    if (scanf("%d", &n) != 1) return 0;
+
+    int *a = (int *)malloc(n * sizeof(int));
+    for (int i = 0; i < n; i++) {
+        if (scanf("%d", &a[i]) != 1) {
+            free(a);
+            return 0;
+        }
+    }
+
+    // Monotonic stack to store the elements
+    int *stack = (int *)malloc(n * sizeof(int));
+    int top = -1;
+    int max_xor = 0;
+
+    // Linearly find all candidate pairs where elements can be the 2 smallest 
+    for (int i = 0; i < n; i++) {
+        // While current element is smaller than the stack top element
+        while (top >= 0 && stack[top] > a[i]) {
+            max_xor = MAX(max_xor, stack[top] ^ a[i]);
+            top--; // Pop the element
+        }
+        
+        // If stack is not empty, the current element pairs with the element below it
+        if (top >= 0) {
+            max_xor = MAX(max_xor, stack[top] ^ a[i]);
+        }
+        
+        // Push the current element onto the stack
+        stack[++top] = a[i];
+    }
+
+    // Clean up allocated memory
+    free(a);
+    free(stack);
+
+    // Print the global maximum value
+    printf("%d\n", max_xor);
+
+    return 0;
+}
