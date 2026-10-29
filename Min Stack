@@ -1,0 +1,50 @@
+#include <stdlib.h>
+#include <limits.h>
+typedef struct {
+    int val;
+    int min_val;
+} StackElement;
+
+typedef struct {
+    StackElement* data;
+    int top_idx;
+    int capacity;
+} MinStack;
+MinStack* minStackCreate() {
+    MinStack* obj = (MinStack*)malloc(sizeof(MinStack));
+    obj->capacity = 1024; 
+    obj->data = (StackElement*)malloc(obj->capacity * sizeof(StackElement));
+    obj->top_idx = -1;
+    return obj;
+}
+void minStackPush(MinStack* obj, int val) {
+    if (obj->top_idx + 1 >= obj->capacity) {
+        obj->capacity *= 2;
+        obj->data = (StackElement*)realloc(obj->data, obj->capacity * sizeof(StackElement));
+    }
+    
+    obj->top_idx++;
+    obj->data[obj->top_idx].val = val;
+    if (obj->top_idx == 0) {
+        obj->data[obj->top_idx].min_val = val;
+    } else {
+        int current_min = obj->data[obj->top_idx - 1].min_val;
+        obj->data[obj->top_idx].min_val = (val < current_min) ? val : current_min;
+    }
+}
+void minStackPop(MinStack* obj) {
+    if (obj->top_idx >= 0) {
+        obj->top_idx--;
+    }
+}
+int minStackTop(MinStack* obj) {
+    return obj->data[obj->top_idx].val;
+}
+int minStackGetMin(MinStack* obj) {
+    return obj->data[obj->top_idx].min_val;
+}
+
+void minStackFree(MinStack* obj) {
+    free(obj->data);
+    free(obj);
+}
